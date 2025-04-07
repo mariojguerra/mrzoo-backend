@@ -7,7 +7,6 @@ from routes_api import routes, socketio
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
-from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_socketio import SocketIO, emit
 
 import os
@@ -26,13 +25,6 @@ SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'mrzoo.db')}"
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Configuração para upload de imagens
-app.config['UPLOADED_IMAGES_DEST'] = 'uploads/images'  # Pasta onde as imagens serão salvas
-app.config['UPLOADED_IMAGES_ALLOW'] = IMAGES  # Tipo de arquivo permitido
-
-# Configurando o Flask-Uploads
-images = UploadSet('images', IMAGES)
-configure_uploads(app, images)
 
 # Chave secreta
 SECRET_KEY = '2404@Theo'
