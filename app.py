@@ -11,9 +11,6 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_socketio import SocketIO, emit
 
 import os
-import gunicorn
-import eventlet
-import eventlet.wsgi
 
 app = Flask(__name__)
 app.debug = True
@@ -72,5 +69,8 @@ def home():
 application = app  # <- necessário para o Gunicorn encontrar sua app
 
 if __name__ == "__main__":
+    import gunicorn
+    import eventlet
+    import eventlet.wsgi 
     socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
