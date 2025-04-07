@@ -11,6 +11,8 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_socketio import SocketIO, emit
 
 import os
+import geventwebsocket
+
 
 app = Flask(__name__)
 app.debug = True
