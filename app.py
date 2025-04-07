@@ -11,12 +11,9 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_socketio import SocketIO, emit
 
 import os
-import geventwebsocket
-import gevent
 import gunicorn
 import eventlet
 import eventlet.wsgi
-
 
 app = Flask(__name__)
 app.debug = True
