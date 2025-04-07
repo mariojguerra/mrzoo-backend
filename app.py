@@ -21,7 +21,7 @@ import eventlet.wsgi
 app = Flask(__name__)
 app.debug = True
 
-socketio.init_app(app)
+socketio.init_app(app, async_mode='gevent')
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
