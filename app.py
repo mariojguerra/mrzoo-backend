@@ -11,11 +11,12 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_socketio import SocketIO, emit
 
 import os
+import gunicorn
 
 app = Flask(__name__)
 app.debug = True
 
-socketio.init_app(app)
+socketio.init_app(app, async_mode='gevent')
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -69,8 +70,6 @@ def home():
 application = app  # <- necessário para o Gunicorn encontrar sua app
 
 if __name__ == "__main__":
-    import gunicorn
-    import eventlet
-    import eventlet.wsgi 
+    import gevent
     socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
