@@ -17,6 +17,7 @@ app.debug = True
 
 socketio.init_app(app)
 
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'mrzoo.db')}"
 
@@ -66,5 +67,5 @@ def home():
     return "API do MrZoo está rodando!"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
