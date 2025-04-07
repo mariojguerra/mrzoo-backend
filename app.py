@@ -66,5 +66,5 @@ def home():
     return "API do MrZoo está rodando!"
 
 if __name__ == "__main__":
-    app.run(host="10.0.2.2", port=5000, debug=True)
+    app.run(debug=True)
 
