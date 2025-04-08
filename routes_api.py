@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 import os
 from flask import send_from_directory
 
-UPLOAD_FOLDER = 'uploads/images'
+UPLOAD_FOLDER = 'static/uploads/images'
 socketio = SocketIO()
 
 routes = Blueprint('routes', __name__)
