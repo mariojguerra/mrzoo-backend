@@ -1,6 +1,6 @@
 # app.py
 from flask import Flask
-from config import Config
+from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
 from models import db
 from routes_api import routes, socketio
 
@@ -10,9 +10,6 @@ from flask_bcrypt import Bcrypt
 from flask_socketio import SocketIO, emit
 
 import os
-import gunicorn
-
-from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
 
 app = Flask(__name__)
 app.debug = True
