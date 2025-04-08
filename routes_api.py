@@ -84,15 +84,15 @@ def upload_imagens_animal():
             timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
             filename = f"{animal_id}_{i}_{timestamp}_{uuid.uuid4().hex[:6]}.jpg"
             diretorio_destino = os.path.join("uploads", "usuarios", str(usuario_id), "animais", animal_id)
-
             os.makedirs(diretorio_destino, exist_ok=True)
 
-            imagem.save(diretorio_destino)
+            # Salvar com caminho completo
+            caminho_completo = os.path.join(diretorio_destino, filename)
+            imagem.save(caminho_completo)
 
             url = f"/uploads/usuarios/{usuario_id}/animais/{animal_id}/{filename}"
             urls_salvas.append(url)
 
-            # Salva no banco de dados
             nova_imagem = ImagemAnimal(
                 animal_id=animal_id,
                 url=url,
@@ -102,6 +102,7 @@ def upload_imagens_animal():
 
     db.session.commit()
     return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
+
 
 
 
@@ -119,7 +120,6 @@ def upload_imagem_principal():
     if imagem.filename == '':
         return {"erro": "Nome de arquivo vazio"}, 400
 
-    # Corrigido para bater com a URL que você está retornando
     pasta_upload = os.path.join('uploads', 'images', f"usuario_{current_user}", f"animal_{animal_id}")
     os.makedirs(pasta_upload, exist_ok=True)
 
@@ -127,20 +127,19 @@ def upload_imagem_principal():
     caminho = os.path.join(pasta_upload, nome_seguro)
     imagem.save(caminho)
 
-    # Essa URL agora vai bater certinho com a pasta real
     url = f"/uploads/images/usuario_{current_user}/animal_{animal_id}/{nome_seguro}"
 
+    # Atualiza a imagem_url do animal
     animal = Animal.query.filter_by(id=animal_id, usuario_id=current_user).first()
 
     if not animal:
-       return jsonify({"message": "Animal não encontrado ou não pertence ao usuário!"}), 404
+        return jsonify({"message": "Animal não encontrado ou não pertence ao usuário!"}), 404
 
-    data = request.get_json()
-    animal.imagem_url = data.get("imagem_url", animal.imagem_url)
+    # Pegando a URL direto do campo do form
+    animal.imagem_url = url
     db.session.commit()
 
     return jsonify({"url": url}), 200
-  
 
 @routes.route("/animais", methods=["POST"])
 @jwt_required()  # Protegendo a rota
