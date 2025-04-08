@@ -3,31 +3,32 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from datetime import datetime
 from sqlalchemy import Float
-import json
+from sqlalchemy.dialects.mysql import DOUBLE
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
 class Especie(db.Model):
     __tablename__ = 'especies'
-    id = db.Column(db.Integer, primary_key=True)
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nome = db.Column(db.String(100), nullable=False, unique=True)
     racas = db.relationship("Raca", backref="especie", lazy=True)
 
 class Raca(db.Model):
     __tablename__ = 'racas'
-    id = db.Column(db.Integer, primary_key=True)
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nome = db.Column(db.String(100), nullable=False)
     especie_id = db.Column(db.Integer, db.ForeignKey('especies.id'), nullable=False)
     animais = db.relationship('Animal', backref='raca_obj', lazy=True)
 
-
 class ImagemAnimal(db.Model):
     __tablename__ = 'imagens_animais'
-
-    id = db.Column(db.Integer, primary_key=True)
-    animal_id = db.Column(db.String, db.ForeignKey('animal.id'), nullable=False)
-    url = db.Column(db.String, nullable=False)
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey('animal.id'), nullable=False)
+    url = db.Column(db.String(255), nullable=False)
     data_upload = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_json(self):
@@ -39,7 +40,9 @@ class ImagemAnimal(db.Model):
         }
 
 class Animal(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'animal'
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id_animal = db.Column(db.String(50), nullable=False)
     nome = db.Column(db.String(100), nullable=False)
     especie = db.Column(db.String(50), nullable=False)
@@ -48,11 +51,11 @@ class Animal(db.Model):
     descricao = db.Column(db.Text)
     imagem_url = db.Column(db.String(255))
     localizacao = db.Column(db.String(100))
-    latitude = db.Column(Float)  # Adicionando Latitude
-    longitude = db.Column(Float)  # Adicionando Longitude
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)  # Chave estrangeira
+    latitude = db.Column(DOUBLE)
+    longitude = db.Column(DOUBLE)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
     especie_id = db.Column(db.Integer, db.ForeignKey('especies.id'), nullable=False)
-    raca_id = db.Column(db.Integer, db.ForeignKey('racas.id'), nullable=False)    
+    raca_id = db.Column(db.Integer, db.ForeignKey('racas.id'), nullable=False)
     imagens = db.relationship("ImagemAnimal", backref="animal", lazy=True)
 
     def to_json(self):
@@ -72,13 +75,14 @@ class Animal(db.Model):
         }
 
 class Usuario(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'usuario'
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     animais = db.relationship('Animal', backref='usuario', lazy=True)
     likes = db.relationship('Like', backref='usuario', lazy=True)
     notificacoes = db.relationship('Notificacao', backref='usuario', lazy=True)
-
 
     def set_password(self, password):
         from werkzeug.security import generate_password_hash
@@ -92,13 +96,13 @@ class Usuario(db.Model):
         return {
             'id': self.id,
             'username': self.username,
-            'animais': [animal.to_json() for animal in self.animais]  # Lista de animais do usuário
-
+            'animais': [animal.to_json() for animal in self.animais]
         }
 
-
 class Match(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'match'
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     animal1_id = db.Column(db.Integer, db.ForeignKey('animal.id'), nullable=False)
     animal2_id = db.Column(db.Integer, db.ForeignKey('animal.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -110,10 +114,11 @@ class Match(db.Model):
             "animal2_id": self.animal2_id,
             "created_at": self.created_at.strftime('%Y-%m-%d %H:%M:%S')
         }
-    
-    
+
 class Like(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'like'
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
     animal_id = db.Column(db.Integer, db.ForeignKey('animal.id'), nullable=False)
     liked_animal_id = db.Column(db.Integer, db.ForeignKey('animal.id'), nullable=False)
@@ -125,17 +130,17 @@ class Like(db.Model):
             "animal_id": self.animal_id,
             "liked_animal_id": self.liked_animal_id
         }
-    
 
 class Mensagem(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'mensagem'
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     remetente_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
     destinatario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
     conteudo = db.Column(db.Text, nullable=False)
     data_envio = db.Column(db.DateTime, default=datetime.utcnow)
-    lido = db.Column(db.Boolean, default=False)  # Campo para marcar como lido
+    lido = db.Column(db.Boolean, default=False)
 
-    # Relacionamentos
     remetente = db.relationship('Usuario', foreign_keys=[remetente_id])
     destinatario = db.relationship('Usuario', foreign_keys=[destinatario_id])
 
@@ -151,9 +156,10 @@ class Mensagem(db.Model):
             "destinatario_username": self.destinatario.username
         }
 
-
 class Notificacao(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'notificacao'
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
     mensagem = db.Column(db.String(255), nullable=False)
     lida = db.Column(db.Boolean, default=False)
@@ -167,4 +173,3 @@ class Notificacao(db.Model):
             'lida': self.lida,
             'criada_em': self.criada_em.strftime('%Y-%m-%d %H:%M:%S')
         }
-
