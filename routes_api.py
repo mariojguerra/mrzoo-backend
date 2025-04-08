@@ -1,11 +1,15 @@
 # routes.py
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 from auth import login, cadastro
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, Animal, Usuario, Match, Like, Mensagem, Notificacao
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import math
+from flask import request
+from werkzeug.utils import secure_filename
+import os
 
+UPLOAD_FOLDER = 'uploads/images'
 socketio = SocketIO()
 
 routes = Blueprint('routes', __name__)
@@ -34,6 +38,25 @@ def animais():
     current_user = get_jwt_identity()  # Obtém o ID do usuário logado
     animais = Animal.query.all()
     return jsonify([animal.to_json() for animal in animais])
+
+@routes.route("/upload", methods=["POST"])
+@jwt_required()  # Protegendo a rota
+def upload_imagem():
+    current_user = get_jwt_identity()  # Obtém o ID do usuário logado
+    if 'imagem' not in request.files:
+        return {"erro": "Nenhuma imagem enviada"}, 400
+    
+    imagem = request.files['imagem']
+    if imagem.filename == '':
+        return {"erro": "Nome de arquivo vazio"}, 400
+
+    nome_seguro = secure_filename(imagem.filename)
+    caminho = os.path.join(UPLOAD_FOLDER, nome_seguro)
+    imagem.save(caminho)
+
+    url_imagem = f"/uploads/images/{nome_seguro}"
+    return {"url": url_imagem}, 200
+
 
 @routes.route("/animais", methods=["POST"])
 @jwt_required()  # Protegendo a rota
