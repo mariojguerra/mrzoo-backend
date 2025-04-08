@@ -8,6 +8,7 @@ import math
 from flask import request
 from werkzeug.utils import secure_filename
 import os
+from flask import send_from_directory
 
 UPLOAD_FOLDER = 'uploads/images'
 socketio = SocketIO()
@@ -39,6 +40,12 @@ def animais():
     animais = Animal.query.all()
     return jsonify([animal.to_json() for animal in animais])
 
+
+@routes.route('/uploads/images/<filename>')
+def servir_imagem(filename):
+    return send_from_directory('uploads/images', filename)
+
+
 @routes.route("/upload", methods=["POST"])
 @jwt_required()  # Protegendo a rota
 def upload_imagem():
@@ -50,7 +57,7 @@ def upload_imagem():
     if imagem.filename == '':
         return {"erro": "Nome de arquivo vazio"}, 400
 
-    pasta_upload = os.path.join('uploads', 'images')
+    pasta_upload = os.path.join('static', 'uploads', 'images')
 
     nome_seguro = secure_filename(imagem.filename)
     caminho = os.path.join(UPLOAD_FOLDER, nome_seguro)
@@ -58,7 +65,7 @@ def upload_imagem():
     
     imagem.save(caminho)
 
-    url_imagem = f"/uploads/images/{nome_seguro}"
+    url_imagem = f"/static/uploads/images/{imagem.filename}"
     return {"url": url_imagem}, 200
 
 
