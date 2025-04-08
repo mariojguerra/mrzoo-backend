@@ -43,9 +43,9 @@ def animais():
     return jsonify([animal.to_json() for animal in animais])
 
 
-@routes.route('/uploads/usuarios/<usuario_id>/animais/<animal_id>/<filename>')
+@routes.route('/uploads/usuarios/usuario_<int:usuario_id>/animais/animal_<int:animal_id>/<filename>')
 def servir_foto_animal(usuario_id, animal_id, filename):
-    diretorio_destino = os.path.join("uploads", "usuarios", str(usuario_id), "animais", animal_id)
+    diretorio_destino = os.path.join("uploads", "usuarios", f'usuario_{usuario_id}', f'animal_{animal_id}')
 
         # Segurança extra: impede acesso a arquivos fora da pasta
     if not os.path.isfile(os.path.join(diretorio_destino, filename)):
@@ -69,27 +69,28 @@ def servir_imagem(usuario_id, animal_id, filename):
 def upload_imagens_animal():
     usuario_id = get_jwt_identity()
     animal_id = request.form.get("animal_id")
+    imagens = request.files.getlist("imagens")
 
     if not animal_id:
         return jsonify({"erro": "animal_id é obrigatório"}), 400
 
-    arquivos = request.files.getlist("imagens")
-    if not arquivos:
+    if not imagens:
         return jsonify({"erro": "Nenhuma imagem enviada"}), 400
 
     urls_salvas = []
 
-    for i, imagem in enumerate(arquivos):
+    for i, imagem in enumerate(imagens):
         if imagem:
             nome_seguro = secure_filename(imagem.filename)
 
-            diretorio_destino = os.path.join("uploads", "usuarios", str(usuario_id), "animais", animal_id)
+            diretorio_destino = os.path.join("uploads", "usuarios", f'usuario_{usuario_id}', f'animal_{animal_id}')
             os.makedirs(diretorio_destino, exist_ok=True)
 
             # Salvar com caminho completo
-            imagem.save(diretorio_destino, nome_seguro)
+            caminho_completo = os.path.join(diretorio_destino, nome_seguro)
+            imagem.save(caminho_completo)
 
-            url = f"/uploads/usuarios/{usuario_id}/animais/{animal_id}/{nome_seguro}"
+            url = f"/uploads/usuarios/usuario_{usuario_id}/animais/animal_{animal_id}/{nome_seguro}"
             urls_salvas.append(url)
 
             nova_imagem = ImagemAnimal(
@@ -98,12 +99,9 @@ def upload_imagens_animal():
                 data_upload=datetime.utcnow()
             )
             db.session.add(nova_imagem)
-            
-            db.session.commit()
+    db.session.commit()
 
     return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
-
-
 
 
 @routes.route("/upload_imagens_principal", methods=["POST"])
