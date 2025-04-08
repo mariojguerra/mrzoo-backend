@@ -160,7 +160,7 @@ def upload_imagem():
     # Essa URL agora vai bater certinho com a pasta real
     url = f"/static/uploads/images/usuario_{current_user}/animal_{animal_id}/{nome_seguro}"
 
-    animal = Animal.query.filter_by(id_animal=animal_id, usuario_id=current_user).first()
+    animal = Animal.query.filter_by(id=animal_id, usuario_id=current_user).first()
 
     if not animal:
        return jsonify({"message": "Animal não encontrado ou não pertence ao usuário!"}), 404
