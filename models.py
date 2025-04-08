@@ -5,7 +5,6 @@ from datetime import datetime
 from sqlalchemy import Float
 import json
 
-
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
@@ -13,7 +12,7 @@ class ImagemAnimal(db.Model):
     __tablename__ = 'imagens_animais'
 
     id = db.Column(db.Integer, primary_key=True)
-    animal_id = db.Column(db.String, db.ForeignKey('animais.id_animal'), nullable=False)
+    animal_id = db.Column(db.String, db.ForeignKey('animais.id'), nullable=False)
     url = db.Column(db.String, nullable=False)
     data_upload = db.Column(db.DateTime, default=datetime.utcnow)
 

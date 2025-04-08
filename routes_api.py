@@ -50,7 +50,7 @@ def servir_foto_animal(usuario_id, animal_id, filename):
     return send_from_directory(caminho_completo, filename)
 
 
-@routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<string:animal_id>/<filename>')
+@routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<int:animal_id>/<filename>')
 def servir_imagem(usuario_id, animal_id, filename):
     caminho = os.path.join('static', 'uploads', 'images', f'usuario_{usuario_id}', f'animal_{animal_id}')
 
@@ -112,6 +112,7 @@ def upload_imagem():
 
     imagem = request.files['imagem']
     animal_id = request.form['animal_id']
+    arquivos = request.files.getlist("imagens")
 
     if imagem.filename == '':
         return {"erro": "Nome de arquivo vazio"}, 400
@@ -120,17 +121,49 @@ def upload_imagem():
     pasta_upload = os.path.join('static', 'uploads', 'images', f"usuario_{current_user}", f"animal_{animal_id}")
     os.makedirs(pasta_upload, exist_ok=True)
 
-    existentes = os.listdir(pasta_upload)
-    if len(existentes) >= 6:
-        return jsonify({"message": "Limite de 6 imagens por animal atingido"}), 400
-
     nome_seguro = secure_filename(imagem.filename)
     caminho = os.path.join(pasta_upload, nome_seguro)
     imagem.save(caminho)
 
+    if not arquivos:
+        return jsonify({"erro": "Nenhuma imagem enviada"}), 400
+
+    urls_salvas = []
+
+    for i, imagem in enumerate(arquivos):
+        if imagem:
+            timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
+            filename = f"{animal_id}_{i}_{timestamp}_{uuid.uuid4().hex[:6]}.jpg"
+            diretorio_destino = os.path.join("uploads", "usuarios", str(current_user), "animais", animal_id)
+            caminho_completo = os.path.join(diretorio_destino, filename)
+
+            os.makedirs(diretorio_destino, exist_ok=True)
+
+            imagem.save(caminho_completo)
+
+            url = f"/uploads/usuarios/{current_user}/animais/{animal_id}/{filename}"
+            urls_salvas.append(url)
+
+            # Salva no banco de dados
+            nova_imagem = ImagemAnimal(
+                animal_id=animal_id,
+                url=url,
+                data_upload=datetime.utcnow()
+            )
+            db.session.add(nova_imagem)
+
+    db.session.commit()
+
     # Essa URL agora vai bater certinho com a pasta real
     url = f"/static/uploads/images/usuario_{current_user}/animal_{animal_id}/{nome_seguro}"
-    return {"url": url}, 200
+
+    animal = Animal.query.filter_by(id_animal=animal_id, usuario_id=current_user).first()
+
+    if animal and not animal.imagem_url:
+       animal.imagem_url = url  # define a primeira imagem como capa, se ainda não tiver
+       db.session.commit()
+
+    return jsonify(url.to_json()), 200
 
 
 @routes.route("/animais", methods=["POST"])
@@ -155,7 +188,6 @@ def adicionar_animal():
             latitude=data.get("latitude"),
             longitude=data.get("longitude"),
             usuario_id=current_user_id  # Associa o animal ao usuário logado
-
         )
         
         db.session.add(novo_animal)
@@ -175,6 +207,23 @@ def listar_meus_animais():
     meus_animais = Animal.query.filter_by(usuario_id=current_user_id).all()
     
     return jsonify([animal.to_json() for animal in meus_animais]), 200
+
+
+@routes.route("/meus-animais/<int:animal_id>", methods=["PUT"])
+@jwt_required()
+def editar_imagem_url(animal_id):
+    current_user_id = get_jwt_identity()  # Obtém o ID do usuário autenticado
+    animal = Animal.query.filter_by(id=animal_id, usuario_id=current_user_id).first()
+
+    if not animal:
+        return jsonify({"message": "Animal não encontrado ou não pertence ao usuário!"}), 404
+
+    data = request.get_json()
+    
+    animal.imagem_url = data.get("imagem_url", animal.imagem_url)
+
+    db.session.commit()
+    return jsonify(animal.to_json()), 200
 
 
 @routes.route("/meus-animais/<int:animal_id>", methods=["PUT"])
