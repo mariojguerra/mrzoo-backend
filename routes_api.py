@@ -46,8 +46,12 @@ def animais():
 @routes.route('/uploads/usuarios/<usuario_id>/animais/<animal_id>/<filename>')
 def servir_foto_animal(usuario_id, animal_id, filename):
     diretorio_destino = os.path.join("uploads", "usuarios", str(usuario_id), "animais", animal_id)
-    caminho_completo = os.path.join(diretorio_destino, filename)
-    return send_from_directory(caminho_completo, filename)
+
+        # Segurança extra: impede acesso a arquivos fora da pasta
+    if not os.path.isfile(os.path.join(diretorio_destino, filename)):
+        return abort(404)
+    
+    return send_from_directory(diretorio_destino, filename)
 
 
 @routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<int:animal_id>/<filename>')
@@ -80,11 +84,10 @@ def upload_imagens_animal():
             timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
             filename = f"{animal_id}_{i}_{timestamp}_{uuid.uuid4().hex[:6]}.jpg"
             diretorio_destino = os.path.join("uploads", "usuarios", str(usuario_id), "animais", animal_id)
-            caminho_completo = os.path.join(diretorio_destino, filename)
 
             os.makedirs(diretorio_destino, exist_ok=True)
 
-            imagem.save(caminho_completo)
+            imagem.save(diretorio_destino)
 
             url = f"/uploads/usuarios/{usuario_id}/animais/{animal_id}/{filename}"
             urls_salvas.append(url)
