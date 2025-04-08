@@ -41,32 +41,38 @@ def animais():
     return jsonify([animal.to_json() for animal in animais])
 
 
-@routes.route('/uploads/images/<filename>')
-def servir_imagem(filename):
-    return send_from_directory('uploads/images', filename)
-
+@routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<int:animal_id>/<filename>')
+def servir_foto_animal(usuario_id, animal_id, filename):
+    caminho = os.path.join('static', "uploads", "images", f"usuario_{usuario_id}", f"animal_{animal_id}")
+    return send_from_directory(caminho, filename)
 
 @routes.route("/upload", methods=["POST"])
 @jwt_required()  # Protegendo a rota
 def upload_imagem():
     current_user = get_jwt_identity()  # Obtém o ID do usuário logado
-    if 'imagem' not in request.files:
-        return {"erro": "Nenhuma imagem enviada"}, 400
+    if 'imagem' not in request.filesor or 'animal_id' not in request.form:
+        return jsonify({"message": "Imagem e animal_id são obrigatórios"}), 400
     
     imagem = request.files['imagem']
+    animal_id = request.form['animal_id']
+
     if imagem.filename == '':
         return {"erro": "Nome de arquivo vazio"}, 400
 
-    pasta_upload = os.path.join('static', 'uploads', 'images')
-
-    nome_seguro = secure_filename(imagem.filename)
-    caminho = os.path.join(UPLOAD_FOLDER, nome_seguro)
+    pasta_upload = os.path.join('static', 'uploads', 'images', f"current_user_{current_user}", f"animal_id_{animal_id}")
     os.makedirs(pasta_upload, exist_ok=True)
+
+    # Conta quantas imagens já existem
+    existentes = os.listdir(pasta_upload)
+    if len(existentes) >= 6:
+        return jsonify({"message": "Limite de 6 imagens por animal atingido"}), 400
     
+    nome_seguro = secure_filename(imagem.filename)
+    caminho = os.path.join(pasta_upload, nome_seguro)
     imagem.save(caminho)
 
-    url_imagem = f"/static/uploads/images/{imagem.filename}"
-    return {"url": url_imagem}, 200
+    url = f"/static/uploads/images/usuario_{current_user}/animal_{animal_id}/{nome_seguro}"
+    return {"url": url}, 200
 
 
 @routes.route("/animais", methods=["POST"])
@@ -76,10 +82,11 @@ def adicionar_animal():
         current_user_id = get_jwt_identity()  # Obtém o ID do usuário autenticado
         data = request.get_json()
 
-        if not data or not data.get("nome") or not data.get("especie") or not data.get("raca") or not data.get("idade") or not data.get("especie"):
+        if not data or not data.get("nome") or not data.get("nome") or not data.get("especie") or not data.get("raca") or not data.get("idade") or not data.get("especie"):
             return jsonify({"message": "Nome e espécie são obrigatórios!"}), 400
 
         novo_animal = Animal(
+            id_animal=data["id_animal"],
             nome=data["nome"],
             especie=data["especie"],
             raca=data["raca"],
@@ -123,6 +130,7 @@ def editar_animal(animal_id):
 
     data = request.get_json()
     
+    animal.id_animal = data.get("id_animal", animal.id_animal)
     animal.nome = data.get("nome", animal.nome)
     animal.especie = data.get("especie", animal.especie)
     animal.raca = data.get("raca", animal.raca)
