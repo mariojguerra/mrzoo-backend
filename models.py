@@ -74,7 +74,7 @@ class Animal(db.Model):
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
     animais = db.relationship('Animal', backref='usuario', lazy=True)
     likes = db.relationship('Like', backref='usuario', lazy=True)
     notificacoes = db.relationship('Notificacao', backref='usuario', lazy=True)
