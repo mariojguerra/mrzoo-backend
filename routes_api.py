@@ -86,7 +86,7 @@ def upload_imagens_animal():
 @jwt_required()  # Protegendo a rota
 def upload_imagem():
     current_user = get_jwt_identity()  # Obtém o ID do usuário logado
-    if 'imagem' not in request.filesor or 'animal_id' not in request.form:
+    if 'imagem' not in request.files or 'animal_id' not in request.form:
         return jsonify({"message": "Imagem e animal_id são obrigatórios"}), 400
     
     imagem = request.files['imagem']
