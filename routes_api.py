@@ -9,6 +9,8 @@ from flask import request
 from werkzeug.utils import secure_filename
 import os
 from flask import send_from_directory
+from datetime import datetime
+import uuid
 
 UPLOAD_FOLDER = 'static/uploads/images'
 socketio = SocketIO()
@@ -41,10 +43,44 @@ def animais():
     return jsonify([animal.to_json() for animal in animais])
 
 
+
 @routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<int:animal_id>/<filename>')
 def servir_foto_animal(usuario_id, animal_id, filename):
     caminho = os.path.join('static', "uploads", "images", f"usuario_{usuario_id}", f"animal_{animal_id}")
     return send_from_directory(caminho, filename)
+
+
+@routes.route("/upload_imagens_animal", methods=["POST"])
+@jwt_required()
+def upload_imagens_animal():
+    usuario_id = get_jwt_identity()
+    animal_id = request.form.get("animal_id")
+
+    if not animal_id:
+        return jsonify({"erro": "animal_id é obrigatório"}), 400
+
+    arquivos = request.files.getlist("imagens")
+    if not arquivos:
+        return jsonify({"erro": "Nenhuma imagem enviada"}), 400
+
+    urls_salvas = []
+
+    for i, imagem in enumerate(arquivos):
+        if imagem:
+            timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
+            filename = f"{animal_id}_{i}_{timestamp}_{uuid.uuid4().hex[:6]}.jpg"
+            diretorio_destino = os.path.join("uploads", "usuarios", str(usuario_id), "animais", animal_id)
+            caminho_completo = os.path.join(diretorio_destino, filename)
+
+            os.makedirs(diretorio_destino, exist_ok=True)
+
+            imagem.save(caminho_completo)
+
+            url = f"/uploads/usuarios/{usuario_id}/animais/{animal_id}/{filename}"
+            urls_salvas.append(url)
+
+    return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
+
 
 @routes.route("/upload", methods=["POST"])
 @jwt_required()  # Protegendo a rota
