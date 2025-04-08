@@ -91,9 +91,12 @@ def editar_animal(animal_id):
     
     animal.nome = data.get("nome", animal.nome)
     animal.especie = data.get("especie", animal.especie)
+    animal.raca = data.get("raca", animal.raca)
     animal.idade = data.get("idade", animal.idade)
     animal.descricao = data.get("descricao", animal.descricao)
     animal.imagem_url = data.get("imagem_url", animal.imagem_url)
+    animal.longitude = data.get("longitude", animal.longitude)
+    animal.latitude = data.get("latitude", animal.latitude)
     animal.localizacao = data.get("localizacao", animal.localizacao)
 
     db.session.commit()
