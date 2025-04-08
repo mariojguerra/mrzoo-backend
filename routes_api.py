@@ -43,7 +43,6 @@ def animais():
     return jsonify([animal.to_json() for animal in animais])
 
 
-
 @routes.route('/uploads/usuarios/<usuario_id>/animais/<animal_id>/<filename>')
 def servir_foto_animal(usuario_id, animal_id, filename):
     diretorio_destino = os.path.join("uploads", "usuarios", str(usuario_id), "animais", animal_id)
@@ -51,7 +50,6 @@ def servir_foto_animal(usuario_id, animal_id, filename):
     return send_from_directory(caminho_completo, filename)
 
 
-
 @routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<string:animal_id>/<filename>')
 def servir_imagem(usuario_id, animal_id, filename):
     caminho = os.path.join('static', 'uploads', 'images', f'usuario_{usuario_id}', f'animal_{animal_id}')
@@ -61,18 +59,6 @@ def servir_imagem(usuario_id, animal_id, filename):
         return abort(404)
 
     return send_from_directory(caminho, filename)
-
-
-@routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<string:animal_id>/<filename>')
-def servir_imagem(usuario_id, animal_id, filename):
-    caminho = os.path.join('static', 'uploads', 'images', f'usuario_{usuario_id}', f'animal_{animal_id}')
-
-    # Segurança extra: impede acesso a arquivos fora da pasta
-    if not os.path.isfile(os.path.join(caminho, filename)):
-        return abort(404)
-
-    return send_from_directory(caminho, filename)
-
 
 
 @routes.route("/upload_imagens_animal", methods=["POST"])
