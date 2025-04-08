@@ -22,7 +22,6 @@ class Raca(db.Model):
     animais = db.relationship('Animal', backref='raca_obj', lazy=True)
 
 
-
 class ImagemAnimal(db.Model):
     __tablename__ = 'imagens_animais'
 

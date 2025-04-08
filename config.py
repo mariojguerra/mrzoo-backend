@@ -1,8 +1,15 @@
 # config.py
 import os
 
-class Config:
-    SQLALCHEMY_DATABASE_URI = "sqlite:///mrzoo.db"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.environ.get("SECRET_KEY", "2404@Theo")
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "2404@Theo")
+# Chave secreta
+SECRET_KEY = '2404@Theo'
+
+MYSQL_USER = 'root'
+MYSQL_PASSWORD = 'hvMYogfEVMNDAKMrrxazEALyySAKgeYU'
+MYSQL_HOST = 'mysql.railway.internal'
+MYSQL_PORT = 3306
+MYSQL_DB = 'railway'
+
+SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+

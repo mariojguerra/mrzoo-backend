@@ -12,22 +12,19 @@ from flask_socketio import SocketIO, emit
 import os
 import gunicorn
 
+from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
+
 app = Flask(__name__)
 app.debug = True
 
 socketio.init_app(app, async_mode='gevent')
 
-
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'mrzoo.db')}"
+#BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+#SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'mrzoo.db')}"
 
 # Configuração do banco de dados
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-
-# Chave secreta
-SECRET_KEY = '2404@Theo'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 
 # Configuração do JWT
 app.config["JWT_SECRET_KEY"] = SECRET_KEY
