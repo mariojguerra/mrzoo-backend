@@ -138,7 +138,6 @@ def upload_imagem():
     return {"url": url}, 200
 
 
-
 @routes.route("/animais", methods=["POST"])
 @jwt_required()  # Protegendo a rota
 def adicionar_animal():
