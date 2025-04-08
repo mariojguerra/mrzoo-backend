@@ -2,7 +2,7 @@
 from flask import Blueprint, jsonify
 from auth import login, cadastro
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Animal, Usuario, Match, Like, Mensagem, Notificacao
+from models import db, Animal, Usuario, Match, Like, Mensagem, Notificacao, ImagemAnimal
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import math
 from flask import request
@@ -60,7 +60,6 @@ def servir_imagem(usuario_id, animal_id, filename):
 
     return send_from_directory(caminho, filename)
 
-
 @routes.route("/upload_imagens_animal", methods=["POST"])
 @jwt_required()
 def upload_imagens_animal():
@@ -90,7 +89,17 @@ def upload_imagens_animal():
             url = f"/uploads/usuarios/{usuario_id}/animais/{animal_id}/{filename}"
             urls_salvas.append(url)
 
+            # Salva no banco de dados
+            nova_imagem = ImagemAnimal(
+                animal_id=animal_id,
+                url=url,
+                data_upload=datetime.utcnow()
+            )
+            db.session.add(nova_imagem)
+
+    db.session.commit()
     return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
+
 
 
 @routes.route("/upload", methods=["POST"])

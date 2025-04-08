@@ -3,9 +3,27 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from datetime import datetime
 from sqlalchemy import Float
+import json
+
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+
+class ImagemAnimal(db.Model):
+    __tablename__ = 'imagens_animais'
+
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(db.String, db.ForeignKey('animais.id_animal'), nullable=False)
+    url = db.Column(db.String, nullable=False)
+    data_upload = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "animal_id": self.animal_id,
+            "url": self.url,
+            "data_upload": self.data_upload.isoformat()
+        }
 
 class Animal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -21,15 +39,22 @@ class Animal(db.Model):
     longitude = db.Column(Float)  # Adicionando Longitude
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)  # Chave estrangeira
 
+    imagens = db.relationship("ImagemAnimal", backref="animal", lazy=True)
+
     def to_json(self):
         return {
             "id": self.id,
+            "id_animal": self.id_animal,
             "nome": self.nome,
             "especie": self.especie,
+            "raca": self.raca,
             "idade": self.idade,
             "descricao": self.descricao,
             "imagem_url": self.imagem_url,
-            "localizacao": self.localizacao
+            "localizacao": self.localizacao,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "imagens": [img.to_json() for img in self.imagens]
         }
 
 class Usuario(db.Model):
