@@ -70,7 +70,7 @@ def upload_imagens_animal():
     try:
        usuario_id = get_jwt_identity()
        animal_id = request.form.get("animal_id")
-       imagens = request.files.getlist("imagens")
+       imagens = request.files.lists['imagens']
 
        if not animal_id:
           return jsonify({"erro": "animal_id é obrigatório"}), 400
