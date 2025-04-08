@@ -54,7 +54,7 @@ def adicionar_animal():
             imagem_url=data.get("imagem_url"),
             localizacao=data.get("localizacao"),
             latitude=data.get("latitude"),
-            latitude=data.get("latitude"),
+            longitude=data.get("longitude"),
             usuario_id=current_user_id  # Associa o animal ao usuário logado
 
         )
