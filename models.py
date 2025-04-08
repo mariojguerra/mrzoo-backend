@@ -11,6 +11,7 @@ class Animal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
     especie = db.Column(db.String(50), nullable=False)
+    raca = db.Column(db.String(50), nullable=False)
     idade = db.Column(db.Integer)
     descricao = db.Column(db.Text)
     imagem_url = db.Column(db.String(255))

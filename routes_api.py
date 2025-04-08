@@ -42,16 +42,19 @@ def adicionar_animal():
         current_user_id = get_jwt_identity()  # Obtém o ID do usuário autenticado
         data = request.get_json()
 
-        if not data or not data.get("nome") or not data.get("especie"):
+        if not data or not data.get("nome") or not data.get("especie") or not data.get("raca") or not data.get("idade") or not data.get("especie"):
             return jsonify({"message": "Nome e espécie são obrigatórios!"}), 400
 
         novo_animal = Animal(
             nome=data["nome"],
             especie=data["especie"],
+            raca=data["raca"],
             idade=data.get("idade"),
             descricao=data.get("descricao"),
             imagem_url=data.get("imagem_url"),
             localizacao=data.get("localizacao"),
+            latitude=data.get("latitude"),
+            latitude=data.get("latitude"),
             usuario_id=current_user_id  # Associa o animal ao usuário logado
 
         )
