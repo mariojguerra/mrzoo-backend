@@ -163,8 +163,8 @@ def upload_imagem():
        animal.imagem_url = url  # define a primeira imagem como capa, se ainda não tiver
        db.session.commit()
 
-    return jsonify(url.to_json()), 200
-
+    return jsonify({"url": url}), 200
+  
 
 @routes.route("/animais", methods=["POST"])
 @jwt_required()  # Protegendo a rota
