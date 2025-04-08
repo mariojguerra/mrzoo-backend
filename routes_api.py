@@ -67,19 +67,20 @@ def servir_imagem(usuario_id, animal_id, filename):
 @routes.route("/upload_imagens_animal", methods=["POST"])
 @jwt_required()
 def upload_imagens_animal():
-    usuario_id = get_jwt_identity()
-    animal_id = request.form.get("animal_id")
-    imagens = request.files.getlist("imagens")
+    try:
+       usuario_id = get_jwt_identity()
+       animal_id = request.form.get("animal_id")
+       imagens = request.files.getlist("imagens")
 
-    if not animal_id:
-        return jsonify({"erro": "animal_id é obrigatório"}), 400
+       if not animal_id:
+          return jsonify({"erro": "animal_id é obrigatório"}), 400
 
-    if not imagens:
-        return jsonify({"erro": "Nenhuma imagem enviada"}), 400
+       if not imagens:
+          return jsonify({"erro": "Nenhuma imagem enviada"}), 400
 
-    urls_salvas = []
+       urls_salvas = []
 
-    for i, imagem in enumerate(imagens):
+       for i, imagem in enumerate(imagens):
         if imagem:
             nome_seguro = secure_filename(imagem.filename)
 
@@ -99,10 +100,13 @@ def upload_imagens_animal():
                 data_upload=datetime.utcnow()
             )
             db.session.add(nova_imagem)
-    db.session.commit()
 
-    return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
+        db.session.commit()
 
+        return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
+    except Exception as e:
+        print(f"Erro ao adicionar animal: {e}")
+        return jsonify({"message": {e}}), 500
 
 @routes.route("/upload_imagens_principal", methods=["POST"])
 @jwt_required()
