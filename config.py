@@ -10,3 +10,4 @@ SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 #mysql://root:hvMYogfEVMNDAKMrrxazEALyySAKgeYU@mysql.railway.internal:3306/railway
+
