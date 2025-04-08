@@ -1,6 +1,6 @@
 # app.py
 from flask import Flask
-from mrzoo_backend.config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
+from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
 from models import db
 from routes_api import routes, socketio
 
