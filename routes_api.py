@@ -162,9 +162,12 @@ def upload_imagem():
 
     animal = Animal.query.filter_by(id_animal=animal_id, usuario_id=current_user).first()
 
-    if animal and not animal.imagem_url:
-       animal.imagem_url = url  # define a primeira imagem como capa, se ainda não tiver
-       db.session.commit()
+    if not animal:
+       return jsonify({"message": "Animal não encontrado ou não pertence ao usuário!"}), 404
+
+    data = request.get_json()
+    animal.imagem_url = data.get("imagem_url", animal.imagem_url)
+    db.session.commit()
 
     return jsonify({"url": url}), 200
   
