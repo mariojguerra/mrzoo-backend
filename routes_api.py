@@ -50,8 +50,12 @@ def upload_imagem():
     if imagem.filename == '':
         return {"erro": "Nome de arquivo vazio"}, 400
 
+    pasta_upload = os.path.join('uploads', 'images')
+
     nome_seguro = secure_filename(imagem.filename)
     caminho = os.path.join(UPLOAD_FOLDER, nome_seguro)
+    os.makedirs(pasta_upload, exist_ok=True)
+    
     imagem.save(caminho)
 
     url_imagem = f"/uploads/images/{nome_seguro}"
