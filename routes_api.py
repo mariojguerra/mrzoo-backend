@@ -2,7 +2,7 @@
 from flask import Blueprint, jsonify
 from auth import login, cadastro
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Animal, Usuario, Match, Like, Mensagem, Notificacao, ImagemAnimal
+from models import db, Animal, Usuario, Match, Like, Mensagem, Notificacao, ImagemAnimal, Especie, Raca
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import math
 from flask import request
@@ -34,6 +34,100 @@ def notificacao_match(animal1, animal2):
     criar_notificacao(animal1.usuario_id, f"Seu pet {animal1.nome} deu match com {animal2.nome}!")
     criar_notificacao(animal2.usuario_id, f"Seu pet {animal2.nome} deu match com {animal1.nome}!")
 
+
+@routes.route('/especies', methods=['POST'])
+@jwt_required()
+def criar_especie():
+    data = request.get_json()
+    nome = data.get('nome')
+
+    if not nome:
+        return jsonify({"erro": "Nome é obrigatório."}), 400
+
+    especie = Especie(nome=nome)
+    db.session.add(especie)
+    db.session.commit()
+
+    return jsonify({"id": especie.id, "nome": especie.nome}), 201
+
+@routes.route('/especies', methods=['POST'])
+@jwt_required()  # Remova se quiser que a rota seja pública
+def adicionar_especies():
+    try:
+        dados = request.get_json()
+        
+        if not isinstance(dados, list):
+            return jsonify({"erro": "Esperado uma lista de espécies"}), 400
+        
+        novas_especies = []
+        for item in dados:
+            nome = item.get("nome")
+            if not nome:
+                continue  # pula se não tiver nome
+            especie = Especie(nome=nome)
+            novas_especies.append(especie)
+        
+        if not novas_especies:
+            return jsonify({"erro": "Nenhuma espécie válida fornecida"}), 400
+
+        db.session.add_all(novas_especies)
+        db.session.commit()
+
+        return jsonify({"mensagem": f"{len(novas_especies)} espécies adicionadas com sucesso"}), 201
+    
+    except Exception as e:
+        print(f"Erro ao adicionar espécies: {e}")
+        return jsonify({"erro": "Erro interno no servidor"}), 500
+
+
+@routes.route('/racas', methods=['POST'])
+@jwt_required()
+def adicionar_racas():
+    try:
+        dados = request.get_json()
+
+        if not isinstance(dados, list):
+            return jsonify({"erro": "Esperado uma lista de raças"}), 400
+
+        novas_racas = []
+        for item in dados:
+            nome = item.get("nome")
+            especie_id = item.get("especie_id")
+
+            if not nome or not especie_id:
+                continue
+
+            nova_raca = Raca(nome=nome, especie_id=especie_id)
+            novas_racas.append(nova_raca)
+
+        if not novas_racas:
+            return jsonify({"erro": "Nenhuma raça válida fornecida"}), 400
+
+        db.session.add_all(novas_racas)
+        db.session.commit()
+
+        return jsonify({"mensagem": f"{len(novas_racas)} raças adicionadas com sucesso"}), 201
+
+    except Exception as e:
+        print(f"Erro ao adicionar raças: {e}")
+        return jsonify({"erro": "Erro interno no servidor"}), 500
+
+
+@routes.route('/racas', methods=['POST'])
+@jwt_required()
+def criar_raca():
+    data = request.get_json()
+    nome = data.get('nome')
+    especie_id = data.get('especie_id')
+
+    if not nome or not especie_id:
+        return jsonify({"erro": "Nome e especie_id são obrigatórios."}), 400
+
+    raca = Raca(nome=nome, especie_id=especie_id)
+    db.session.add(raca)
+    db.session.commit()
+
+    return jsonify({"id": raca.id, "nome": raca.nome, "especie_id": raca.especie_id}), 201
 
 @routes.route("/animais", methods=["GET"])
 @jwt_required()  # Protege a rota com o JWT

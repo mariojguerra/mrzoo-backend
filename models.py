@@ -8,6 +8,21 @@ import json
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
+class Especie(db.Model):
+    __tablename__ = 'especies'
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False, unique=True)
+    racas = db.relationship("Raca", backref="especie", lazy=True)
+
+class Raca(db.Model):
+    __tablename__ = 'racas'
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    especie_id = db.Column(db.Integer, db.ForeignKey('especies.id'), nullable=False)
+    animais = db.relationship('Animal', backref='raca_obj', lazy=True)
+
+
+
 class ImagemAnimal(db.Model):
     __tablename__ = 'imagens_animais'
 
@@ -37,7 +52,8 @@ class Animal(db.Model):
     latitude = db.Column(Float)  # Adicionando Latitude
     longitude = db.Column(Float)  # Adicionando Longitude
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)  # Chave estrangeira
-
+    especie_id = db.Column(db.Integer, db.ForeignKey('especies.id'), nullable=False)
+    raca_id = db.Column(db.Integer, db.ForeignKey('racas.id'), nullable=False)    
     imagens = db.relationship("ImagemAnimal", backref="animal", lazy=True)
 
     def to_json(self):
