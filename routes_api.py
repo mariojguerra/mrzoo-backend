@@ -44,8 +44,14 @@ def animais():
 
 
 
-@routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<int:animal_id>/<filename>')
+@routes.route('/uploads/images/usuario_<int:usuario_id>/animal_<int:animal_id>/<filename>')
 def servir_foto_animal(usuario_id, animal_id, filename):
+    caminho = os.path.join("uploads", "images", f"usuario_{usuario_id}", f"animal_{animal_id}")
+    return send_from_directory(caminho, filename)
+
+
+@routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<int:animal_id>/<filename>')
+def servir_imagem(usuario_id, animal_id, filename):
     caminho = os.path.join('static', "uploads", "images", f"usuario_{usuario_id}", f"animal_{animal_id}")
     return send_from_directory(caminho, filename)
 
