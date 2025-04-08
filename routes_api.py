@@ -82,15 +82,16 @@ def upload_imagens_animal():
     for i, imagem in enumerate(arquivos):
         if imagem:
             timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
-            filename = f"{animal_id}_{i}_{timestamp}_{uuid.uuid4().hex[:6]}.jpg"
+            nome_seguro = secure_filename(imagem.filename)
+
             diretorio_destino = os.path.join("uploads", "usuarios", str(usuario_id), "animais", animal_id)
             os.makedirs(diretorio_destino, exist_ok=True)
 
             # Salvar com caminho completo
-            caminho_completo = os.path.join(diretorio_destino, filename)
+            caminho_completo = os.path.join(diretorio_destino, nome_seguro)
             imagem.save(caminho_completo)
 
-            url = f"/uploads/usuarios/{usuario_id}/animais/{animal_id}/{filename}"
+            url = f"/uploads/usuarios/{usuario_id}/animais/{animal_id}/{nome_seguro}"
             urls_salvas.append(url)
 
             nova_imagem = ImagemAnimal(
@@ -99,8 +100,8 @@ def upload_imagens_animal():
                 data_upload=datetime.utcnow()
             )
             db.session.add(nova_imagem)
+            db.session.commit()
 
-    db.session.commit()
     return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
 
 
