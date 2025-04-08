@@ -8,7 +8,7 @@ import math
 from flask import request
 from werkzeug.utils import secure_filename
 import os
-from flask import send_from_directory
+from flask import send_from_directory, abort
 from datetime import datetime
 import uuid
 
@@ -51,10 +51,28 @@ def servir_foto_animal(usuario_id, animal_id, filename):
     return send_from_directory(caminho_completo, filename)
 
 
+
 @routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<string:animal_id>/<filename>')
 def servir_imagem(usuario_id, animal_id, filename):
-    caminho = os.path.join('static', "uploads", "images", f"usuario_{usuario_id}", f"animal_{animal_id}")
+    caminho = os.path.join('static', 'uploads', 'images', f'usuario_{usuario_id}', f'animal_{animal_id}')
+
+    # Segurança extra: impede acesso a arquivos fora da pasta
+    if not os.path.isfile(os.path.join(caminho, filename)):
+        return abort(404)
+
     return send_from_directory(caminho, filename)
+
+
+@routes.route('/static/uploads/images/usuario_<int:usuario_id>/animal_<string:animal_id>/<filename>')
+def servir_imagem(usuario_id, animal_id, filename):
+    caminho = os.path.join('static', 'uploads', 'images', f'usuario_{usuario_id}', f'animal_{animal_id}')
+
+    # Segurança extra: impede acesso a arquivos fora da pasta
+    if not os.path.isfile(os.path.join(caminho, filename)):
+        return abort(404)
+
+    return send_from_directory(caminho, filename)
+
 
 
 @routes.route("/upload_imagens_animal", methods=["POST"])
@@ -90,32 +108,35 @@ def upload_imagens_animal():
 
 
 @routes.route("/upload", methods=["POST"])
-@jwt_required()  # Protegendo a rota
+@jwt_required()
 def upload_imagem():
-    current_user = get_jwt_identity()  # Obtém o ID do usuário logado
+    current_user = get_jwt_identity()
+
     if 'imagem' not in request.files or 'animal_id' not in request.form:
         return jsonify({"message": "Imagem e animal_id são obrigatórios"}), 400
-    
+
     imagem = request.files['imagem']
     animal_id = request.form['animal_id']
 
     if imagem.filename == '':
         return {"erro": "Nome de arquivo vazio"}, 400
 
-    pasta_upload = os.path.join('static', 'uploads', 'images', f"current_user_{current_user}", f"animal_id_{animal_id}")
+    # Corrigido para bater com a URL que você está retornando
+    pasta_upload = os.path.join('static', 'uploads', 'images', f"usuario_{current_user}", f"animal_{animal_id}")
     os.makedirs(pasta_upload, exist_ok=True)
 
-    # Conta quantas imagens já existem
     existentes = os.listdir(pasta_upload)
     if len(existentes) >= 6:
         return jsonify({"message": "Limite de 6 imagens por animal atingido"}), 400
-    
+
     nome_seguro = secure_filename(imagem.filename)
     caminho = os.path.join(pasta_upload, nome_seguro)
     imagem.save(caminho)
 
+    # Essa URL agora vai bater certinho com a pasta real
     url = f"/static/uploads/images/usuario_{current_user}/animal_{animal_id}/{nome_seguro}"
     return {"url": url}, 200
+
 
 
 @routes.route("/animais", methods=["POST"])
