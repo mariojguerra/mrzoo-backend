@@ -4,6 +4,17 @@ from models import db, Especie
 
 especie_routes = Blueprint('especie_routes', __name__)
 
+@especie_routes.route("/especies", methods=["GET"])
+@jwt_required()
+def listar_especies():
+    try:
+        especies = Especie.query.all()
+        return jsonify([{"id": e.id, "nome": e.nome} for e in especies]), 200
+    except Exception as e:
+        print(f"Erro ao listar espécies: {e}")
+        return jsonify({"erro": "Erro interno no servidor"}), 500
+
+
 @especie_routes.route('/especies', methods=['POST'])
 @jwt_required()
 def criar_especie():

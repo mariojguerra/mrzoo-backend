@@ -33,6 +33,7 @@ def criar_racas():
 
 
 @raca_routes.route('/racas', methods=['GET'])
+@jwt_required()
 def listar_racas():
     especie_id = request.args.get('especie_id')
 
