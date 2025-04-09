@@ -8,10 +8,11 @@ import os
 
 from models import db, Animal, ImagemAnimal
 from cloudinary.uploader import upload as cloudinary_upload
+from cloudinary.uploader import upload
 
 upload_routes = Blueprint('upload_routes', __name__)
 
-@upload_routes.route("/upload_cloudinary", methods=["POST"])
+upload_routes.route("/upload_cloudinary", methods=["POST"])
 @jwt_required()
 def upload_para_cloudinary():
     usuario_id = get_jwt_identity()
@@ -23,18 +24,19 @@ def upload_para_cloudinary():
     animal_id = request.form['animal_id']
 
     try:
-        resultado = cloudinary_upload(imagem, folder=f"mrzoo/usuario_{usuario_id}/animal_{animal_id}/")
+        resultado = upload(imagem, folder=f"mrzoo/usuario_{usuario_id}//animal_{animal_id}/")
         url = resultado.get("secure_url")
 
         animal = Animal.query.filter_by(id=animal_id, usuario_id=usuario_id).first()
-        if not animal:
-            return jsonify({"message": "Animal não encontrado ou não pertence ao usuário!"}), 404
 
+        if not animal:
+           return jsonify({"message": "Animal não encontrado ou não pertence ao usuário!"}), 404
+
+        # Pegando a URL direto do campo do form
         animal.imagem_url = url
         db.session.commit()
 
         return jsonify({"url": url}), 200
-
     except Exception as e:
         print(f"Erro ao enviar para o Cloudinary: {e}")
         return jsonify({"erro": "Falha no upload"}), 500
@@ -45,36 +47,40 @@ def upload_para_cloudinary():
 def upload_multiplas_cloudinary():
     usuario_id = get_jwt_identity()
     animal_id = request.form.get("animal_id")
-    arquivos = request.files.getlist("imagens")
 
-    if not animal_id or not arquivos:
-        return jsonify({"erro": "Dados incompletos"}), 400
+    if not animal_id:
+        return jsonify({"erro": "animal_id é obrigatório"}), 400
+
+    arquivos = request.files.getlist("imagens")
+    if not arquivos:
+        return jsonify({"erro": "Nenhuma imagem enviada"}), 400
 
     urls_salvas = []
 
     try:
         for imagem in arquivos:
-            resultado = cloudinary_upload(
-                imagem,
-                folder=f"mrzoo/usuario_{usuario_id}/animal_{animal_id}/",
-                public_id=f"{animal_id}_{uuid.uuid4().hex[:6]}"
-            )
-            url = resultado.get("secure_url")
-            urls_salvas.append(url)
+            if imagem:
+                resultado = upload(
+                    imagem,
+                    folder=f"mrzoo/usuario_{usuario_id}/animal_{animal_id}/",
+                    public_id=f"{animal_id}_{uuid.uuid4().hex[:6]}"
+                )
+                url = resultado.get("secure_url")
+                urls_salvas.append(url)
 
-            nova_imagem = ImagemAnimal(
-                animal_id=animal_id,
-                url=url,
-                data_upload=datetime.utcnow()
-            )
-            db.session.add(nova_imagem)
+                nova_imagem = ImagemAnimal(
+                    animal_id=animal_id,
+                    url=url,
+                    data_upload=datetime.utcnow()
+                )
+                db.session.add(nova_imagem)
 
         db.session.commit()
         return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
 
     except Exception as e:
-        print(f"Erro ao enviar múltiplas para Cloudinary: {e}")
-        return jsonify({"erro": str(e)}), 500
+        print(f"Erro ao enviar para Cloudinary: {e}")
+        return jsonify({"erro": "Erro interno no servidor"}), 500
     
     
 @upload_routes.route('/uploads/usuarios/usuario_<int:usuario_id>/animais/animal_<int:animal_id>/<filename>')
