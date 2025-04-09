@@ -52,7 +52,7 @@ app.register_blueprint(routes)
 
 @app.route("/")
 def home():
-    return "API do MrZoo está rodando!"
+    return "Servidor do MrZoo está ativo!"
 
 application = app  # <- necessário para o Gunicorn encontrar sua app
 

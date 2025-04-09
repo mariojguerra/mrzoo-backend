@@ -401,7 +401,6 @@ def editar_animal(animal_id):
     return jsonify(animal.to_json()), 200
 
 
-
 @routes.route("/meus-animais/<int:animal_id>", methods=["DELETE"])
 @jwt_required()
 def deletar_animal(animal_id):
