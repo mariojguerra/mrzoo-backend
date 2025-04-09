@@ -12,7 +12,7 @@ from cloudinary.uploader import upload
 
 upload_routes = Blueprint('upload_routes', __name__)
 
-upload_routes.route("/upload_cloudinary", methods=["POST"])
+@upload_routes.route("/upload_cloudinary", methods=["POST"])
 @jwt_required()
 def upload_para_cloudinary():
     usuario_id = get_jwt_identity()
