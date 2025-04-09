@@ -246,11 +246,16 @@ def adicionar_animal():
         if not data or not data.get("nome") or not data.get("nome") or not data.get("especie") or not data.get("raca") or not data.get("idade") or not data.get("especie"):
             return jsonify({"message": "Nome e espécie são obrigatórios!"}), 400
 
+        especie_id = data.get("especie_id")
+        raca_id = data.get("raca_id")
+
         novo_animal = Animal(
             id_animal=data["id_animal"],
             nome=data["nome"],
             especie=data["especie"],
             raca=data["raca"],
+            especie_id=especie_id,
+            raca_id=raca_id,
             idade=data.get("idade"),
             descricao=data.get("descricao"),
             imagem_url=data.get("imagem_url"),
