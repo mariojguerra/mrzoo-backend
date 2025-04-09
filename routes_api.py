@@ -15,7 +15,6 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from cloudinary_config import cloudinary
 
-UPLOAD_FOLDER = 'static/uploads/images'
 socketio = SocketIO()
 
 routes = Blueprint('routes', __name__)

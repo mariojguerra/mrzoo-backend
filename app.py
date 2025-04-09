@@ -2,7 +2,8 @@
 from flask import Flask
 from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
 from models import db
-from routes_api import routes, socketio
+
+from routes import routes, socketio
 
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
