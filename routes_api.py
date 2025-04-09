@@ -162,44 +162,46 @@ def servir_imagem(usuario_id, animal_id, filename):
 @jwt_required()
 def upload_imagens_animal():
     try:
-       usuario_id = get_jwt_identity()
-       animal_id = request.form.get("animal_id")
-       imagens = request.files.getlist("imagens")
+        usuario_id = get_jwt_identity()
+        animal_id = request.form.get("animal_id")
+        imagens = request.files.getlist("imagens")
 
-       if not animal_id:
-          return jsonify({"erro": "animal_id é obrigatório"}), 400
+        if not animal_id:
+            return jsonify({"erro": "animal_id é obrigatório"}), 400
 
-       if not imagens:
-          return jsonify({"erro": "Nenhuma imagem enviada"}), 400
+        if not imagens:
+            return jsonify({"erro": "Nenhuma imagem enviada"}), 400
 
-       urls_salvas = []
+        urls_salvas = []
 
-       for imagem in imagens:
-          if imagem:
-             filename = f"{uuid.uuid4().hex[:6]}.jpg"
+        for imagem in imagens:
+            if imagem:
+                filename = f"{uuid.uuid4().hex[:6]}.jpg"
 
-             diretorio_destino = os.path.join("uploads", "usuarios", f'usuario_{usuario_id}', f'animal_{animal_id}')
-             os.makedirs(diretorio_destino, exist_ok=True)
+                diretorio_destino = os.path.join("uploads", "usuarios", f'usuario_{usuario_id}', f'animal_{animal_id}')
+                os.makedirs(diretorio_destino, exist_ok=True)
 
-            # Salvar com caminho completo
-             caminho_completo = os.path.join(diretorio_destino, filename)
-             imagem.save(caminho_completo)
+                # Salvar com caminho completo
+                caminho_completo = os.path.join(diretorio_destino, filename)
+                imagem.save(caminho_completo)
 
-             url = f"/uploads/usuarios/usuario_{usuario_id}/animais/animal_{animal_id}/{filename}"
-             urls_salvas.append(url)
+                url = f"/uploads/usuarios/usuario_{usuario_id}/animais/animal_{animal_id}/{filename}"
+                urls_salvas.append(url)
 
-             nova_imagem = ImagemAnimal(
-                animal_id=animal_id,
-                url=url,
-                data_upload=datetime.utcnow()
-             )
-             db.session.add(nova_imagem)
+                nova_imagem = ImagemAnimal(
+                    animal_id=animal_id,
+                    url=url,
+                    data_upload=datetime.utcnow()
+                )
+                db.session.add(nova_imagem)
 
-          db.session.commit()
-       return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
+        db.session.commit()
+        return jsonify({"mensagem": "Imagens salvas com sucesso", "imagens": urls_salvas}), 200
+
     except Exception as e:
-     print(f"Erro ao adicionar animal: {e}")
-    return jsonify({"message": {e}}), 500
+        print(f"Erro ao adicionar imagens: {e}")
+        return jsonify({"message": str(e)}), 500
+
 
 @routes.route("/upload_imagens_principal", methods=["POST"])
 @jwt_required()
