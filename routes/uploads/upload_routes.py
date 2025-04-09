@@ -9,6 +9,8 @@ import os
 from models import db, Animal, ImagemAnimal
 from cloudinary.uploader import upload as cloudinary_upload
 from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+from cloudinary_config import cloudinary
 
 upload_routes = Blueprint('upload_routes', __name__)
 
