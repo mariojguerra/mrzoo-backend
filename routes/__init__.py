@@ -13,6 +13,8 @@ from .chat_routes import chat_routes
 from .notificacao_routes import notificacao_routes
 from .like_routes import like_routes
 from .explorar_routes import explorar_routes
+from .planos_routes import planos_routes
+from .assinatura_routes import assinatura_routes
 
 routes = Blueprint('routes', __name__)
 socketio = SocketIO()
@@ -29,4 +31,5 @@ routes.register_blueprint(chat_routes)
 routes.register_blueprint(notificacao_routes)
 routes.register_blueprint(like_routes)
 routes.register_blueprint(explorar_routes)
-
+routes.register_blueprint(planos_routes)
+routes.register_blueprint(assinatura_routes)

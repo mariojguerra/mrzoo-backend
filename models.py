@@ -4,6 +4,8 @@ from flask_bcrypt import Bcrypt
 from datetime import datetime
 from sqlalchemy import Float
 from sqlalchemy.dialects.mysql import DOUBLE
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, Boolean, String
+from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -172,4 +174,43 @@ class Notificacao(db.Model):
             'mensagem': self.mensagem,
             'lida': self.lida,
             'criada_em': self.criada_em.strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+class Plano(db.Model):
+    __tablename__ = "planos"
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, unique=True, nullable=False)  # Ex: Free, Gold, Premium
+    descricao = Column(String)
+    preco = Column(Float, default=0.0)
+    duracao_dias = Column(Integer)  # Ex: 30 dias
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "nome": self.nome,
+            "descricao": self.descricao,
+            "preco": self.preco,
+            "duracao_dias": self.duracao_dias
+        }
+
+    
+class Assinatura(db.Model):
+    __tablename__ = "assinaturas"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    plano_id = Column(Integer, ForeignKey("planos.id"), nullable=False)
+    inicio = Column(DateTime, default=datetime.utcnow)
+    fim = Column(DateTime)
+    ativa = Column(Boolean, default=True)
+
+    plano = relationship("Plano")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "usuario_id": self.usuario_id,
+            "plano": self.plano.to_dict() if self.plano else None,
+            "inicio": self.inicio.isoformat(),
+            "fim": self.fim.isoformat() if self.fim else None,
+            "ativa": self.ativa
         }
