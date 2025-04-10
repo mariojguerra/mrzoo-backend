@@ -2,14 +2,14 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, Plano
 
-plano_routes = Blueprint('planos_routes', __name__)
+planos_routes = Blueprint('planos_routes', __name__)
 
-@plano_routes.route("/planos", methods=["GET"])
+@planos_routes.route("/planos", methods=["GET"])
 def listar_planos():
     planos = Plano.query.all()
     return jsonify([p.to_dict() for p in planos]), 200
 
-@plano_routes.route("/planos", methods=["POST"])
+@planos_routes.route("/planos", methods=["POST"])
 def criar_plano():
     data = request.get_json()
     plano = Plano(
