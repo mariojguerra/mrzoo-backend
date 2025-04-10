@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, Plano
 
-plano_routes = Blueprint('plano_routes', __name__)
+plano_routes = Blueprint('planos_routes', __name__)
 
 @plano_routes.route("/planos", methods=["GET"])
 def listar_planos():
