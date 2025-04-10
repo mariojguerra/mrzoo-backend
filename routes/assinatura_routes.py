@@ -18,7 +18,7 @@ def criar_assinatura():
     fim = inicio + timedelta(days=plano.duracao_dias)
 
     assinatura = Assinatura(
-        usuario_id=usuario.id,
+        usuario_id=usuario,
         plano_id=plano.id,
         inicio=inicio,
         fim=fim,
@@ -32,7 +32,7 @@ def criar_assinatura():
 @jwt_required()
 def minha_assinatura():
     usuario = get_jwt_identity()
-    assinatura = Assinatura.query.filter_by(usuario_id=usuario.id, ativa=True).order_by(Assinatura.inicio.desc()).first()
+    assinatura = Assinatura.query.filter_by(usuario_id=usuario, ativa=True).order_by(Assinatura.inicio.desc()).first()
     if not assinatura:
         return jsonify({"error": "Nenhuma assinatura ativa"}), 404
     return jsonify(assinatura.to_dict()), 200

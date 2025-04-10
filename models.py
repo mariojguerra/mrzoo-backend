@@ -178,11 +178,12 @@ class Notificacao(db.Model):
 
 class Plano(db.Model):
     __tablename__ = "planos"
-    id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String, unique=True, nullable=False)  # Ex: Free, Gold, Premium
-    descricao = Column(String)
-    preco = Column(Float, default=0.0)
-    duracao_dias = Column(Integer)  # Ex: 30 dias
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False, unique=True)
+    descricao = db.Column(db.Text)
+    preco = db.Column(db.Float, default=0.0)
+    duracao_dias = db.Column(db.Integer, nullable=False)
 
     def to_dict(self):
         return {
@@ -192,18 +193,18 @@ class Plano(db.Model):
             "preco": self.preco,
             "duracao_dias": self.duracao_dias
         }
-
     
 class Assinatura(db.Model):
     __tablename__ = "assinaturas"
-    id = Column(Integer, primary_key=True, index=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
-    plano_id = Column(Integer, ForeignKey("planos.id"), nullable=False)
-    inicio = Column(DateTime, default=datetime.utcnow)
-    fim = Column(DateTime)
-    ativa = Column(Boolean, default=True)
 
-    plano = relationship("Plano")
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)
+    plano_id = db.Column(db.Integer, db.ForeignKey("planos.id"), nullable=False)
+    inicio = db.Column(db.DateTime, default=datetime.utcnow)
+    fim = db.Column(db.DateTime)
+    ativa = db.Column(db.Boolean, default=True)
+
+    plano = db.relationship("Plano", backref="assinaturas")
 
     def to_dict(self):
         return {

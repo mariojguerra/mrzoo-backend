@@ -4,12 +4,12 @@ from models import db, Plano
 
 plano_routes = Blueprint('plano_routes', __name__)
 
-@plano_routes.route("/", methods=["GET"])
+@plano_routes.route("/planos", methods=["GET"])
 def listar_planos():
     planos = Plano.query.all()
     return jsonify([p.to_dict() for p in planos]), 200
 
-@plano_routes.route("/", methods=["POST"])
+@plano_routes.route("/planos", methods=["POST"])
 def criar_plano():
     data = request.get_json()
     plano = Plano(
