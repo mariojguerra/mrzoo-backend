@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import Animal, db
-from sqlalchemy import or_
+from models import Animal
 
 explorar_routes = Blueprint('explorar_routes', __name__)
 
