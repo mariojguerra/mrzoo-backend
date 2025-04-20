@@ -15,6 +15,8 @@ from .like_routes import like_routes
 from .explorar_routes import explorar_routes
 from .planos_routes import planos_routes
 from .assinatura_routes import assinatura_routes
+from .premium_routes import premium_routes
+from .ranking_routes import ranking_routes 
 
 routes = Blueprint('routes', __name__)
 socketio = SocketIO()
@@ -33,3 +35,6 @@ routes.register_blueprint(like_routes)
 routes.register_blueprint(explorar_routes)
 routes.register_blueprint(planos_routes)
 routes.register_blueprint(assinatura_routes)
+routes.register_blueprint(premium_routes)
+routes.register_blueprint(ranking_routes)
+

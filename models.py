@@ -178,6 +178,7 @@ class Notificacao(db.Model):
 
 class Plano(db.Model):
     __tablename__ = "planos"
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
 
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False, unique=True)
@@ -185,17 +186,21 @@ class Plano(db.Model):
     preco = db.Column(db.Float, default=0.0)
     duracao_dias = db.Column(db.Integer, nullable=False)
 
+    modulos = db.relationship("PlanoModulo", back_populates="plano")
+
     def to_dict(self):
         return {
             "id": self.id,
             "nome": self.nome,
             "descricao": self.descricao,
             "preco": self.preco,
-            "duracao_dias": self.duracao_dias
+            "duracao_dias": self.duracao_dias,
+            "modulos": [m.modulo.nome for m in self.modulos]
         }
     
 class Assinatura(db.Model):
     __tablename__ = "assinaturas"
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
 
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)
@@ -215,3 +220,26 @@ class Assinatura(db.Model):
             "fim": self.fim.isoformat() if self.fim else None,
             "ativa": self.ativa
         }
+    
+class Modulo(db.Model):
+    __tablename__ = "modulos"
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), unique=True, nullable=False)  # Ex: "Chat", "Swipe", "Ranking", etc.
+
+    def to_dict(self):
+        return {"id": self.id, "nome": self.nome}
+    
+class PlanoModulo(db.Model):
+    __tablename__ = "plano_modulos"
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+
+
+    id = db.Column(db.Integer, primary_key=True)
+    plano_id = db.Column(db.Integer, db.ForeignKey("planos.id"))
+    modulo_id = db.Column(db.Integer, db.ForeignKey("modulos.id"))
+
+    plano = db.relationship("Plano", back_populates="modulos")
+    modulo = db.relationship("Modulo", back_populates="planos")

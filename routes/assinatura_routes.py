@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Plano, Assinatura
+from models import db, Plano, Assinatura, Usuario
 from datetime import datetime, timedelta
+from functools import wraps
 
 assinatura_routes = Blueprint('assinatura_routes', __name__)
 
@@ -28,11 +29,26 @@ def criar_assinatura():
     db.session.commit()
     return jsonify(assinatura.to_dict()), 201
 
-@assinatura_routes.route("/assinaturas/me", methods=["GET"])
+
+@assinatura_routes.route("/me", methods=["GET"])
 @jwt_required()
 def minha_assinatura():
     usuario = get_jwt_identity()
-    assinatura = Assinatura.query.filter_by(usuario_id=usuario, ativa=True).order_by(Assinatura.inicio.desc()).first()
+
+    assinatura = (
+        Assinatura.query
+        .filter_by(usuario_id=usuario.id, ativa=True)
+        .order_by(Assinatura.inicio.desc())
+        .first()
+    )
+
     if not assinatura:
         return jsonify({"error": "Nenhuma assinatura ativa"}), 404
+
+    # 🔍 Verifica se a assinatura está expirada
+    if assinatura.fim and assinatura.fim < datetime.utcnow():
+        assinatura.ativa = False
+        db.session.commit()
+        return jsonify({"error": "Assinatura expirada"}), 403
+
     return jsonify(assinatura.to_dict()), 200
