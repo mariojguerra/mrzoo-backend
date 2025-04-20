@@ -8,5 +8,8 @@ class Modulo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), unique=True, nullable=False)  # Ex: "Chat", "Swipe", "Ranking", etc.
 
+    planos = db.relationship("PlanoModulo", back_populates="modulo")
+
+
     def to_dict(self):
         return {"id": self.id, "nome": self.nome}
