@@ -17,6 +17,7 @@ from .planos_routes import planos_routes
 from .assinatura_routes import assinatura_routes
 from .premium_routes import premium_routes
 from .ranking_routes import ranking_routes 
+from utils import assinatura_utils
 
 routes = Blueprint('routes', __name__)
 socketio = SocketIO()

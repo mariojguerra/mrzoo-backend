@@ -3,16 +3,18 @@ from flask import jsonify, request
 from datetime import datetime
 from models import Assinatura, db
 from models import Usuario  # ou sua lógica de autenticação
+from flask_jwt_extended import get_jwt_identity
 
-# Função simulando usuário logado (substitua depois pela sua real)
-def get_usuario_fake():
-    return Usuario.query.get(1)
+
+def get_usuario_logado():
+    usuario_id = get_jwt_identity()
+    return Usuario.query.get(usuario_id)
 
 def verifica_assinatura_ativa():
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            usuario = get_usuario_fake()
+            usuario = get_usuario_logado()
             assinatura = (
                 Assinatura.query
                 .filter_by(usuario_id=usuario.id, ativa=True)
@@ -35,7 +37,7 @@ def verifica_modulo_permitido(modulo_necessario: str):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            usuario = get_usuario_fake()
+            usuario = get_usuario_logado()
             assinatura = (
                 Assinatura.query
                 .filter_by(usuario_id=usuario.id, ativa=True)

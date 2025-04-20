@@ -1,1 +1,0 @@
-from .assinatura_utils import verifica_assinatura_ativa
