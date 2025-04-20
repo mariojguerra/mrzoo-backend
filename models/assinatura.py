@@ -6,7 +6,7 @@ class Assinatura(db.Model):
     __table_args__ = {'mysql_charset': 'utf8mb4'}
 
     id = db.Column(db.Integer, primary_key=True)
-    usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"), nullable=False)
     plano_id = db.Column(db.Integer, db.ForeignKey("planos.id"), nullable=False)
     inicio = db.Column(db.DateTime, default=datetime.utcnow)
     fim = db.Column(db.DateTime)
