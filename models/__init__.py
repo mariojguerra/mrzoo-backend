@@ -2,6 +2,7 @@ from .db import db
 from .usuario import Usuario
 from .assinatura import Assinatura
 from .especie import Especie
+from .animal import Animal
 from .imagem_animal import ImagemAnimal
 from .plano_modulo import PlanoModulo
 from .plano import Plano
